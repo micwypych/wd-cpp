@@ -45,16 +45,18 @@
 
 <script type="text/javascript">
   angular.module('wd-students', ['ngResource'])
-    .controller('StudentsListCtrl', ['StudentService',function(studentSrv) {
+    .controller('StudentsListCtrl', ['StudentService','$http',function(studentSrv,$http) {
       var self = this;
       self.mod = 'Hello World!'
       self.students = [];
       var fetchStudents = function() {
-          studentSrv.query(
+          //studentSrv.query().$promise.then(
+          $http.get('/api/student').then(
             function (resp) {
               self.students = resp.data;
               console.log("successful request");
               console.log(resp.data);
+
             }, function (errResponse) {
               console.error('Nie udało się załadować studentów');
             }
