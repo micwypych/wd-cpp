@@ -7,7 +7,7 @@ using namespace crow;
 
 class Student {
  public:
-  Student(long long int id_,
+  Student(unsigned int id_,
           const string &first_name_,
           const string &last_name_,
           const string &program_,
@@ -25,9 +25,12 @@ class Student {
     to_return["pesel"] = pesel_;
     return to_return;
   }
+  unsigned int Id() const {
+    return id_;
+  }
 
  private:
-  long long id_;
+  unsigned int id_;
   string first_name_;
   string last_name_;
   string program_;
@@ -36,6 +39,10 @@ class Student {
 };
 
 void RunServer() {
+  //FIXME concurrent access!
+  std::vector<Student> students{{102314, "Alojzy", "Motyka", "informatyka", 22, "00000000000"},
+                                {564321, "Krzysztof", "Mallory", "astronomia", 19, "00000000000"}};
+
   SimpleApp app;
   CROW_ROUTE(app, "/api/hello/<int>")
       ([](int count) {
@@ -53,15 +60,28 @@ void RunServer() {
       });
 
   CROW_ROUTE(app, "/api/student")
-      ([]() {
-        std::vector<Student> students{{10231234, "Alojzy", "Motyka", "informatyka", 22, "00000000000"},
-                                      {56432321, "Krzysztof", "Mallory", "astronomia", 19, "00000000000"}};
+      ([&students]() {
         json::wvalue x;
         x = students;
         std::string json_message = json::dump(x);
         CROW_LOG_INFO << " - MESSAGE: " << json_message;
         return x;
       });
+
+  CROW_ROUTE(app, "/api/student/<uint>")
+      .methods("DELETE"_method)
+          ([&students](unsigned int id) {
+            const auto it =
+                find_if(students.begin(), students.end(), [id](const auto &student) { return student.Id() == id; });
+            if (it != students.end()) {
+              students.erase(it);
+              CROW_LOG_INFO << " - MESSAGE: student of id: " << id << " was found";
+              return response(204);
+            } else {
+              CROW_LOG_INFO << " - MESSAGE: student of id: " << id << " was not found";
+              return response(404);
+            }
+          });
 
   app.port(9876).multithreaded().run();
 }

@@ -33,7 +33,7 @@
                     <button type="button" class="btn btn-success">
                         <span class="glyphicon glyphicon-edit glyphicon-white"></span>
                     </button>
-                    <button type="button" class="btn btn-danger">
+                    <button type="button" class="btn btn-danger" ng-click="ctrl.deleteStudent(student)">
                         <span class="remove glyphicon glyphicon-remove-sign glyphicon-white"></span>
                     </button>
                 </td>
@@ -56,16 +56,22 @@
     angular.module('wd-students', ['ngResource'])
         .controller('StudentsListCtrl', ['StudentService', '$http', function (studentSrv, $http) {
             var self = this;
-            self.mod = 'Hello World!'
+            self.mod = 'Hello World!';
             self.students = [];
             var fetchStudents = function () {
                 self.students = studentSrv.query();
+            };
+            self.deleteStudent = function (student) {
+                console.log('try to delete student of id: ' + student.id);
+                studentSrv.delete(student).$promise.then(function () {
+                    fetchStudents();
+                });
             };
 
             fetchStudents();
         }])
         .factory('StudentService', ['$resource', function ($resource) {
-            return $resource('/api/student/:id');
+            return $resource('/api/student/:id', {id: '@id'});
         }]);
 </script>
 </body>
