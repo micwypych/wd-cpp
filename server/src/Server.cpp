@@ -25,6 +25,7 @@ class Student {
     to_return["pesel"] = pesel_;
     return to_return;
   }
+
  private:
   long long id_;
   string first_name_;
@@ -36,8 +37,8 @@ class Student {
 
 void RunServer() {
   SimpleApp app;
-  CROW_ROUTE(app,"/api/hello/<int>")
-      ([](int count){
+  CROW_ROUTE(app, "/api/hello/<int>")
+      ([](int count) {
         if (count > 100)
           return crow::response(400);
         ostringstream os;
@@ -45,21 +46,21 @@ void RunServer() {
         return crow::response(os.str());
       });
 
-  CROW_ROUTE(app,"/")
-      ([](){
+  CROW_ROUTE(app, "/")
+      ([]() {
         mustache::context ctx;
         return mustache::load_text("index.html");
       });
 
-  CROW_ROUTE(app,"/api/student")
-      ([](){
-        std::vector<Student> students {{10231234, "Alojzy", "Motyka", "informatyka", 22, "00000000000"},
-                                       {56432321, "Krzysztof", "Mallory", "astronomia", 19, "00000000000"}};
+  CROW_ROUTE(app, "/api/student")
+      ([]() {
+        std::vector<Student> students{{10231234, "Alojzy", "Motyka", "informatyka", 22, "00000000000"},
+                                      {56432321, "Krzysztof", "Mallory", "astronomia", 19, "00000000000"}};
         json::wvalue x;
         x = students;
         std::string json_message = json::dump(x);
         CROW_LOG_INFO << " - MESSAGE: " << json_message;
-        return json_message;
+        return x;
       });
 
   app.port(9876).multithreaded().run();
