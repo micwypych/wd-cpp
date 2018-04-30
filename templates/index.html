@@ -1,37 +1,46 @@
 <!DOCTYPE html>
 <html lang="en" ng-app="wd-students">
-  <head>
-    <meta charset="utf-8"> 
+<head>
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-  </head>
+</head>
 <body ng-controller="StudentsListCtrl as ctrl">
 <div class="container-fluid">
-  <h1>Wirtualny dziekanat 2.0</h1>
-  <p>{{ctrl.mod}}</p>
-  <div class="table-responsive">
-    <table class="table table-hover table-condensed">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Firstname</th>
-        <th>Lastname</th>
-        <th>Program</th>
-        <th>Age</th>
-        <th>PESEL</th>
-      </tr>
-    </thead>
-    <tbody ng-repeat="student in ctrl.students">
-      <tr>
-        <td ng-bind="::student.id"></td>
-        <td ng-bind="::student.first_name"></td>
-        <td ng-bind="::student.last_name"></td>
-        <td ng-bind="::student.program"></td>
-        <td ng-bind="::student.age"></td>
-        <td ng-bind="::student.pesel"></td>
-      </tr>
-    </tbody>
-    </table>
-  </div>
+    <h1>Wirtualny dziekanat 2.0</h1>
+    <p>{{ctrl.mod}}</p>
+    <div class="table-responsive">
+        <table class="table table-hover table-condensed">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Firstname</th>
+                <th>Lastname</th>
+                <th>Program</th>
+                <th>Age</th>
+                <th>PESEL</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody ng-repeat="student in ctrl.students">
+            <tr>
+                <td ng-bind="::student.id"></td>
+                <td ng-bind="::student.first_name"></td>
+                <td ng-bind="::student.last_name"></td>
+                <td ng-bind="::student.program"></td>
+                <td ng-bind="::student.age"></td>
+                <td ng-bind="::student.pesel"></td>
+                <td>
+                    <button type="button" class="btn btn-success">
+                        <span class="glyphicon glyphicon-edit glyphicon-white"></span>
+                    </button>
+                    <button type="button" class="btn btn-danger">
+                        <span class="remove glyphicon glyphicon-remove-sign glyphicon-white"></span>
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -44,30 +53,20 @@
 
 
 <script type="text/javascript">
-  angular.module('wd-students', ['ngResource'])
-    .controller('StudentsListCtrl', ['StudentService','$http',function(studentSrv,$http) {
-      var self = this;
-      self.mod = 'Hello World!'
-      self.students = [];
-      var fetchStudents = function() {
-          //studentSrv.query().$promise.then(
-          $http.get('/api/student').then(
-            function (resp) {
-              self.students = resp.data;
-              console.log("successful request");
-              console.log(resp.data);
+    angular.module('wd-students', ['ngResource'])
+        .controller('StudentsListCtrl', ['StudentService', '$http', function (studentSrv, $http) {
+            var self = this;
+            self.mod = 'Hello World!'
+            self.students = [];
+            var fetchStudents = function () {
+                self.students = studentSrv.query();
+            };
 
-            }, function (errResponse) {
-              console.error('Nie udało się załadować studentów');
-            }
-          );
-      };
-
-      fetchStudents();
-    }])
-    .factory('StudentService',['$resource', function($resource) {
-        return $resource('/api/student/:id');
-    }]);
+            fetchStudents();
+        }])
+        .factory('StudentService', ['$resource', function ($resource) {
+            return $resource('/api/student/:id');
+        }]);
 </script>
 </body>
 </html>
