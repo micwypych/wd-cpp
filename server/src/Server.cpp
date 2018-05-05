@@ -55,6 +55,8 @@ class IncrementalIdGenerator : public IdGenerator {
   unsigned int current_value_;
 };
 
+Student StudentFromJson(unique_ptr<IdGenerator> &generator, const json::rvalue &x);
+
 void RunServer() {
   //FIXME concurrent access!
   std::vector<Student> students{{102314, "Alojzy", "Motyka", "informatyka", 22, "00000000000"},
@@ -95,13 +97,8 @@ void RunServer() {
               auto x = json::load(req.body);
               if (!x)
                 return response(400);
-              unsigned int id = generator->NextId();
-              string first_name = x["first_name"].s();
-              string last_name = x["last_name"].s();
-              string program = x["program"].s();
-              int age = static_cast<int>(x["age"]);
-              string pesel = x["pesel"].s();
-              Student s{id, first_name, last_name, program, age, pesel};
+              CROW_LOG_INFO << " - MESSAGE: " << x;
+              Student s = StudentFromJson(generator, x);
               students.push_back(s);
               return response(204);
             };
@@ -130,4 +127,19 @@ void RunServer() {
           });
 
   app.port(9876).multithreaded().run();
+}
+
+Student StudentFromJson(unique_ptr<IdGenerator> &generator, const json::rvalue &x) {
+  unsigned int id;
+  if (!x.has("id") || x["id"].u() == 0) {
+    id = generator->NextId();
+  } else {
+    id = x["id"].u();
+  }
+  string first_name = x["first_name"].s();
+  string last_name = x["last_name"].s();
+  string program = x["program"].s();
+  int age = static_cast<int>(x["age"]);
+  string pesel = x["pesel"].s();
+  return {id, first_name, last_name, program, age, pesel};
 }
