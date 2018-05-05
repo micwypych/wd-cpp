@@ -38,10 +38,29 @@ class Student {
   string pesel_;
 };
 
+class IdGenerator {
+ public:
+  virtual unsigned int NextId() =0;
+};
+
+class IncrementalIdGenerator : public IdGenerator {
+ public:
+  IncrementalIdGenerator(unsigned int current_value) : current_value_(current_value) {}
+  unsigned int NextId() override {
+    return current_value_++;
+  }
+
+ private:
+  //FIXME change to atomic
+  unsigned int current_value_;
+};
+
 void RunServer() {
   //FIXME concurrent access!
   std::vector<Student> students{{102314, "Alojzy", "Motyka", "informatyka", 22, "00000000000"},
                                 {564321, "Krzysztof", "Mallory", "astronomia", 19, "00000000000"}};
+
+  unique_ptr<IdGenerator> generator = make_unique<IncrementalIdGenerator>(100);
 
   SimpleApp app;
   CROW_ROUTE(app, "/api/hello/<int>")
@@ -60,13 +79,40 @@ void RunServer() {
       });
 
   CROW_ROUTE(app, "/api/student")
-      ([&students]() {
-        json::wvalue x;
-        x = students;
-        std::string json_message = json::dump(x);
-        CROW_LOG_INFO << " - MESSAGE: " << json_message;
-        return x;
-      });
+      .methods("GET"_method, "POST"_method)
+          ([&students, &generator](const request &req) {
+            //TODO at this moment it is imposible to have two crow routes with different methods, I guess...
+            //so this ugly solution has to suffice
+            auto get_handler =
+                [&students]() {
+                  json::wvalue x;
+                  x = students;
+                  std::string json_message = json::dump(x);
+                  CROW_LOG_INFO << " - MESSAGE: " << json_message;
+                  return response(x);
+                };
+            auto post_handler = [&students, &generator](const request &req) {
+              auto x = json::load(req.body);
+              if (!x)
+                return response(400);
+              unsigned int id = generator->NextId();
+              string first_name = x["first_name"].s();
+              string last_name = x["last_name"].s();
+              string program = x["program"].s();
+              int age = static_cast<int>(x["age"]);
+              string pesel = x["pesel"].s();
+              Student s{id, first_name, last_name, program, age, pesel};
+              students.push_back(s);
+              return response(204);
+            };
+            if (req.method == "GET"_method) {
+              return get_handler();
+            } else if (req.method == "POST"_method) {
+              return post_handler(req);
+            } else {
+              return response(404);
+            }
+          });
 
   CROW_ROUTE(app, "/api/student/<uint>")
       .methods("DELETE"_method)

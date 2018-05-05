@@ -39,6 +39,16 @@
                 </td>
             </tr>
             </tbody>
+            <div>
+                <form name="newStudentForm" ng-submit="ctrl.createStudent()">
+                    <input type="text" placeholder="First Name" ng-model="ctrl.newStudent.first_name" required>
+                    <input type="text" placeholder="Last Name" ng-model="ctrl.newStudent.last_name" required>
+                    <input type="text" placeholder="Program" ng-model="ctrl.newStudent.program" required>
+                    <input type="text" placeholder="Age" ng-model="ctrl.newStudent.age" required>
+                    <input type="text" placeholder="PESEL" ng-model="ctrl.newStudent.pesel" required>
+                    <input type="submit" value="Wprowadź" ng-disabled="newStudentForm.$invalid">
+                </form>
+            </div>
         </table>
     </div>
 </div>
@@ -58,14 +68,22 @@
             var self = this;
             self.mod = 'Hello World!';
             self.students = [];
+            self.newStudent = {};
             var fetchStudents = function () {
                 self.students = studentSrv.query();
             };
+            var resetNewStudent = function () {
+                self.newStudent = {};
+            };
             self.deleteStudent = function (student) {
                 console.log('try to delete student of id: ' + student.id);
-                studentSrv.delete(student).$promise.then(function () {
-                    fetchStudents();
-                });
+                studentSrv.delete(student).$promise
+                    .then(fetchStudents);
+            };
+            self.createStudent = function () {
+                studentSrv.save(self.newStudent).$promise
+                    .then(fetchStudents)
+                    .then(resetNewStudent);
             };
 
             fetchStudents();
