@@ -112,16 +112,42 @@ void RunServer() {
           });
 
   CROW_ROUTE(app, "/api/student/<uint>")
-      .methods("DELETE"_method)
-          ([&students](unsigned int id) {
-            const auto it =
-                find_if(students.begin(), students.end(), [id](const auto &student) { return student.Id() == id; });
-            if (it != students.end()) {
-              students.erase(it);
-              CROW_LOG_INFO << " - MESSAGE: student of id: " << id << " was found";
-              return response(204);
+      .methods("DELETE"_method, "POST"_method)
+          ([&students, &generator](const request &req, unsigned int id) {
+            auto delete_handler = [&students](unsigned int id) {
+              const auto it =
+                  find_if(students.begin(), students.end(), [id](const auto &student) { return student.Id() == id; });
+              if (it != students.end()) {
+                students.erase(it);
+                CROW_LOG_INFO << " - MESSAGE: student of id: " << id << " was found";
+                return response(204);
+              } else {
+                CROW_LOG_INFO << " - MESSAGE: student of id: " << id << " was not found";
+                return response(404);
+              }
+            };
+            auto post_handler = [&students, &generator](const request &req, unsigned int id) {
+              auto x = json::load(req.body);
+              if (!x)
+                return response(400);
+              CROW_LOG_INFO << " - MESSAGE: " << x;
+              Student s = StudentFromJson(generator, x);
+              auto it =
+                  find_if(students.begin(), students.end(), [id](const auto &student) { return student.Id() == id; });
+              if (it != students.end()) {
+                *it = s;
+                CROW_LOG_INFO << " - MESSAGE: student of id: " << id << " was found";
+                return response(204);
+              } else {
+                CROW_LOG_INFO << " - MESSAGE: student of id: " << id << " was not found";
+                return response(404);
+              }
+            };
+            if (req.method == "DELETE"_method) {
+              return delete_handler(id);
+            } else if (req.method == "POST"_method) {
+              return post_handler(req, id);
             } else {
-              CROW_LOG_INFO << " - MESSAGE: student of id: " << id << " was not found";
               return response(404);
             }
           });

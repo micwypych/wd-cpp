@@ -4,52 +4,78 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
-<body ng-controller="StudentsListCtrl as ctrl">
+<body ng-controller="StudentCtrl as ctrl">
 <div class="container-fluid">
     <h1>Wirtualny dziekanat 2.0</h1>
     <p>{{ctrl.mod}}</p>
     <div class="table-responsive">
-        <table class="table table-hover table-condensed">
-            <thead>
-            <tr>
-                <th>#</th>
-                <th>Firstname</th>
-                <th>Lastname</th>
-                <th>Program</th>
-                <th>Age</th>
-                <th>PESEL</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody ng-repeat="student in ctrl.students">
-            <tr>
-                <td ng-bind="::student.id"></td>
-                <td ng-bind="::student.first_name"></td>
-                <td ng-bind="::student.last_name"></td>
-                <td ng-bind="::student.program"></td>
-                <td ng-bind="::student.age"></td>
-                <td ng-bind="::student.pesel"></td>
-                <td>
-                    <button type="button" class="btn btn-success">
-                        <span class="glyphicon glyphicon-edit glyphicon-white"></span>
-                    </button>
-                    <button type="button" class="btn btn-danger" ng-click="ctrl.deleteStudent(student)">
-                        <span class="remove glyphicon glyphicon-remove-sign glyphicon-white"></span>
-                    </button>
-                </td>
-            </tr>
-            </tbody>
-            <div>
-                <form name="newStudentForm" ng-submit="ctrl.createStudent()">
-                    <input type="text" placeholder="First Name" ng-model="ctrl.newStudent.first_name" required>
-                    <input type="text" placeholder="Last Name" ng-model="ctrl.newStudent.last_name" required>
-                    <input type="text" placeholder="Program" ng-model="ctrl.newStudent.program" required>
-                    <input type="text" placeholder="Age" ng-model="ctrl.newStudent.age" required>
-                    <input type="text" placeholder="PESEL" ng-model="ctrl.newStudent.pesel" required>
-                    <input type="submit" value="Wprowadź" ng-disabled="newStudentForm.$invalid">
-                </form>
-            </div>
-        </table>
+        <form name="newStudentForm">
+            <table class="table table-hover table-condensed">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Firstname</th>
+                    <th>Lastname</th>
+                    <th>Program</th>
+                    <th>Age</th>
+                    <th>PESEL</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody ng-repeat="student in ctrl.students">
+                <tr ng-if="!student.edited">
+                    <td ng-bind="::student.id"></td>
+                    <td ng-bind="::student.first_name"></td>
+                    <td ng-bind="::student.last_name"></td>
+                    <td ng-bind="::student.program"></td>
+                    <td ng-bind="::student.age"></td>
+                    <td ng-bind="::student.pesel"></td>
+                    <td>
+                        <button type="button" class="btn btn-success" ng-click="ctrl.editStudent(student.id)">
+                            <span class="glyphicon glyphicon-edit glyphicon-white"></span>
+                        </button>
+                        <button type="button" class="btn btn-danger" ng-click="ctrl.deleteStudent(student)">
+                            <span class="remove glyphicon glyphicon-remove-sign glyphicon-white"></span>
+                        </button>
+                    </td>
+                </tr>
+                <tr ng-if="student.edited">
+                    <td ng-bind="::student.id"></td>
+                    <td><input type="text" ng-value="student.first_name" ng-model="ctrl.editedStudent.first_name"></td>
+                    <td><input type="text" ng-value="student.last_name" ng-model="ctrl.editedStudent.last_name"></td>
+                    <td><input type="text" ng-value="student.program" ng-model="ctrl.editedStudent.program"></td>
+                    <td><input type="text" ng-value="student.age" ng-model="ctrl.editedStudent.age"></td>
+                    <td><input type="text" ng-value="student.pesel" ng-model="ctrl.editedStudent.pesel"></td>
+                    <td>
+                        <button type="submit" class="btn btn-success" ng-click="ctrl.modifyStudent(student.id)"
+                                ng-disabled="newStudentForm.$invalid">
+                            <span class="glyphicon glyphicon-ok glyphicon-white"></span>
+                        </button>
+                        <button type="button" class="btn btn-danger" ng-click="ctrl.cancelEditionOf(student.id)">
+                            <span class="remove glyphicon glyphicon-remove-sign glyphicon-white"></span>
+                        </button>
+                    </td>
+                </tr>
+                <tr ng-if="$last">
+                    <td>NOWY</td>
+                    <td><input type="text" placeholder="First Name" ng-model="ctrl.newStudent.first_name"></td>
+                    <td><input type="text" placeholder="Last Name" ng-model="ctrl.newStudent.last_name"></td>
+                    <td><input type="text" placeholder="Program" ng-model="ctrl.newStudent.program"></td>
+                    <td><input type="text" placeholder="Age" ng-model="ctrl.newStudent.age"></td>
+                    <td><input type="text" placeholder="PESEL" ng-model="ctrl.newStudent.pesel"></td>
+                    <td>
+                        <button type="submit" class="btn btn-success" ng-click="ctrl.createStudent()"
+                                ng-disabled="newStudentForm.$invalid">
+                            <span class="glyphicon glyphicon-plus glyphicon-white"></span>
+                        </button>
+                        <button type="button" class="btn btn-danger" ng-click="ctrl.cancelCreation()">
+                            <span class="remove glyphicon glyphicon-remove-sign glyphicon-white"></span>
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
     </div>
 </div>
 <!-- Latest compiled and minified CSS -->
@@ -64,16 +90,46 @@
 
 <script type="text/javascript">
     angular.module('wd-students', ['ngResource'])
-        .controller('StudentsListCtrl', ['StudentService', '$http', function (studentSrv, $http) {
+        .controller('StudentCtrl', ['StudentService', '$http', 'AddEditedFilter', function (studentSrv, $http, AddEditedFilter) {
             var self = this;
             self.mod = 'Hello World!';
             self.students = [];
             self.newStudent = {};
+            self.editedStudent = {};
             var fetchStudents = function () {
                 self.students = studentSrv.query();
+                var len = self.students.length;
+                for (var i = 0; i < len; i++) {
+                    self.students[i] = AddEditedFilter(self.students[i]);
+                }
             };
             var resetNewStudent = function () {
                 self.newStudent = {};
+            };
+            var resetEditedStudent = function () {
+                self.editedStudent = {};
+            };
+            var setEditedStudent = function (id, newValue) {
+                var len = self.students.length;
+                for (var i = 0; i < len; i++) {
+                    if (self.students[i].id == id) {
+                        self.students[i].edited = newValue;
+                    }
+                }
+            };
+            var getStudentById = function (id) {
+                var len = self.students.length;
+                for (var i = 0; i < len; i++) {
+                    if (self.students[i].id == id) {
+                        return self.students[i];
+                    }
+                }
+                return {};
+            };
+            self.editStudent = function (id) {
+                console.log('trying to edit student of id: ' + id);
+                setEditedStudent(id, true);
+                self.editedStudent = getStudentById(id);
             };
             self.deleteStudent = function (student) {
                 console.log('try to delete student of id: ' + student.id);
@@ -81,15 +137,37 @@
                     .then(fetchStudents);
             };
             self.createStudent = function () {
+                console.log('create new student: ' + self.newStudent);
                 studentSrv.save(self.newStudent).$promise
                     .then(fetchStudents)
                     .then(resetNewStudent);
+            };
+            self.modifyStudent = function (id) {
+                console.log('change student: ' + angular.toJson(self.editedStudent));
+                studentSrv.save({id: self.editedStudent.id}, self.editedStudent).$promise
+                    .then(fetchStudents)
+                    .then(resetEditedStudent);
+            };
+            self.cancelEditionOf = function (id) {
+                console.log('try to cancel edition of student of id: ' + id);
+                resetEditedStudent();
+                setEditedStudent(id, false);
+            };
+            self.cancelCreation = function () {
+                console.log('try to cancel creation of new student');
+                resetNewStudent();
             };
 
             fetchStudents();
         }])
         .factory('StudentService', ['$resource', function ($resource) {
             return $resource('/api/student/:id', {id: '@id'});
+        }])
+        .filter('AddEdited', [function () {
+            return function (obj) {
+                obj.edited = false;
+                return obj;
+            };
         }]);
 </script>
 </body>
