@@ -41,11 +41,15 @@
                 </tr>
                 <tr ng-if="student.edited">
                     <td ng-bind="::student.id"></td>
-                    <td><input type="text" ng-value="student.first_name" ng-model="ctrl.editedStudent.first_name"></td>
-                    <td><input type="text" ng-value="student.last_name" ng-model="ctrl.editedStudent.last_name"></td>
-                    <td><input type="text" ng-value="student.program" ng-model="ctrl.editedStudent.program"></td>
-                    <td><input type="text" ng-value="student.age" ng-model="ctrl.editedStudent.age"></td>
-                    <td><input type="text" ng-value="student.pesel" ng-model="ctrl.editedStudent.pesel"></td>
+                    <td><input type="text" ng-value="student.first_name"
+                               ng-model="ctrl.editedStudents[student.id].first_name"></td>
+                    <td><input type="text" ng-value="student.last_name"
+                               ng-model="ctrl.editedStudents[student.id].last_name"></td>
+                    <td><input type="text" ng-value="student.program"
+                               ng-model="ctrl.editedStudents[student.id].program"></td>
+                    <td><input type="text" ng-value="student.age" ng-model="ctrl.editedStudents[student.id].age"></td>
+                    <td><input type="text" ng-value="student.pesel" ng-model="ctrl.editedStudents[student.id].pesel">
+                    </td>
                     <td>
                         <button type="submit" class="btn btn-success" ng-click="ctrl.modifyStudent(student.id)"
                                 ng-disabled="newStudentForm.$invalid">
@@ -95,7 +99,7 @@
             self.mod = 'Hello World!';
             self.students = [];
             self.newStudent = {};
-            self.editedStudent = {};
+            self.editedStudents = {};
             var fetchStudents = function () {
                 self.students = studentSrv.query();
                 var len = self.students.length;
@@ -103,11 +107,16 @@
                     self.students[i] = AddEditedFilter(self.students[i]);
                 }
             };
+            var fetchOnlySingle = function (id) {
+                var student = studentSrv.get({id: id});
+                console.log('downloaded student is: ' + angular.toJson(student));
+                modifyStudentById(id, student);
+            };
             var resetNewStudent = function () {
                 self.newStudent = {};
             };
-            var resetEditedStudent = function () {
-                self.editedStudent = {};
+            var resetEditedStudent = function (id) {
+                delete self.editedStudents[id];
             };
             var setEditedStudent = function (id, newValue) {
                 var len = self.students.length;
@@ -126,10 +135,20 @@
                 }
                 return {};
             };
+            var modifyStudentById = function (id, student) {
+                var len = self.students.length;
+                for (var i = 0; i < len; i++) {
+                    if (self.students[i].id == id) {
+                        self.students[i] = student;
+                        return;
+                    }
+                }
+                self.students.append(student);
+            };
             self.editStudent = function (id) {
                 console.log('trying to edit student of id: ' + id);
                 setEditedStudent(id, true);
-                self.editedStudent = getStudentById(id);
+                self.editedStudents[id] = getStudentById(id);
             };
             self.deleteStudent = function (student) {
                 console.log('try to delete student of id: ' + student.id);
@@ -143,14 +162,18 @@
                     .then(resetNewStudent);
             };
             self.modifyStudent = function (id) {
-                console.log('change student: ' + angular.toJson(self.editedStudent));
-                studentSrv.save({id: self.editedStudent.id}, self.editedStudent).$promise
-                    .then(fetchStudents)
-                    .then(resetEditedStudent);
+                console.log('change student: ' + angular.toJson(self.editedStudents[id]));
+                studentSrv.save({id: self.editedStudents[id].id}, self.editedStudents[id]).$promise
+                    .then(function () {
+                        setEditedStudent(id, false);
+                    })
+                    .then(function () {
+                        fetchOnlySingle(id);
+                    });
             };
             self.cancelEditionOf = function (id) {
                 console.log('try to cancel edition of student of id: ' + id);
-                resetEditedStudent();
+                resetEditedStudent(id);
                 setEditedStudent(id, false);
             };
             self.cancelCreation = function () {

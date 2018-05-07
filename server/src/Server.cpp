@@ -112,7 +112,7 @@ void RunServer() {
           });
 
   CROW_ROUTE(app, "/api/student/<uint>")
-      .methods("DELETE"_method, "POST"_method)
+      .methods("DELETE"_method, "POST"_method, "GET"_method)
           ([&students, &generator](const request &req, unsigned int id) {
             auto delete_handler = [&students](unsigned int id) {
               const auto it =
@@ -143,10 +143,25 @@ void RunServer() {
                 return response(404);
               }
             };
+            auto get_handler = [&students](unsigned int id) {
+              const auto it =
+                  find_if(students.begin(), students.end(), [id](const auto &student) { return student.Id() == id; });
+              if (it != students.end()) {
+                json::wvalue student;
+                student = *it;
+                CROW_LOG_INFO << " - MESSAGE: student of id: " << id << " was found";
+                return response(student);
+              } else {
+                CROW_LOG_INFO << " - MESSAGE: student of id: " << id << " was not found";
+                return response(404);
+              }
+            };
             if (req.method == "DELETE"_method) {
               return delete_handler(id);
             } else if (req.method == "POST"_method) {
               return post_handler(req, id);
+            } else if (req.method == "GET"_method) {
+              return get_handler(id);
             } else {
               return response(404);
             }
