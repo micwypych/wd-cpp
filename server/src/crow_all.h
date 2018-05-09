@@ -8293,7 +8293,7 @@ public:
             nodes_[idx].rule_index = rule_index;
         }
     private:
-        void debug_node_print(Node* n, int level)
+      void debug_node_print(const Node *n, int level) const
         {
             for(int i = 0; i < (int)ParamType::MAX; i ++)
             {
@@ -8333,7 +8333,7 @@ public:
         }
 
     public:
-        void debug_print()
+      void debug_print() const
         {
             debug_node_print(head(), 0);
         }
@@ -8365,30 +8365,42 @@ public:
         {
         }
 
-        DynamicRule& new_rule_dynamic(const std::string& rule)
+      DynamicRule &new_rule_dynamic(const std::string &rule, const HTTPMethod &method)
         {
             auto ruleObject = new DynamicRule(rule);
 
-            internal_add_rule_object(rule, ruleObject);
+          internal_add_rule_object(rule, ruleObject, method);
 
             return *ruleObject;
         }
+
+//        template <uint64_t N>
+//        typename black_magic::arguments<N>::type::template rebind<TaggedRule>& new_rule_tagged(const std::string& rule)
+//        {
+//            using RuleT = typename black_magic::arguments<N>::type::template rebind<TaggedRule>;
+//            auto ruleObject = new RuleT(rule);
+//
+//            internal_add_rule_object(rule, ruleObject);
+//
+//            return *ruleObject;
+//        }
 
         template <uint64_t N>
-        typename black_magic::arguments<N>::type::template rebind<TaggedRule>& new_rule_tagged(const std::string& rule)
+        typename black_magic::arguments<N>::type::template rebind<TaggedRule> &new_rule_tagged(const std::string &rule,
+                                                                                               const HTTPMethod &method)
         {
-            using RuleT = typename black_magic::arguments<N>::type::template rebind<TaggedRule>;
-            auto ruleObject = new RuleT(rule);
+          using RuleT = typename black_magic::arguments<N>::type::template rebind<TaggedRule>;
+          auto ruleObject = new RuleT(rule);
 
-            internal_add_rule_object(rule, ruleObject);
+          internal_add_rule_object(rule, ruleObject, method);
 
-            return *ruleObject;
+          return *ruleObject;
         }
 
-        void internal_add_rule_object(const std::string& rule, BaseRule* ruleObject)
+  void internal_add_rule_object(const std::string &rule, BaseRule *ruleObject, const HTTPMethod &method)
         {
             rules_.emplace_back(ruleObject);
-            trie_.add(rule, rules_.size() - 1);
+          tries_[method].add(rule, rules_.size() - 1);
 
             // directory case: 
             //   request to `/about' url matches `/about/' rule 
@@ -8396,29 +8408,29 @@ public:
             {
                 std::string rule_without_trailing_slash = rule;
                 rule_without_trailing_slash.pop_back();
-                trie_.add(rule_without_trailing_slash, RULE_SPECIAL_REDIRECT_SLASH);
+              tries_[method].add(rule_without_trailing_slash, RULE_SPECIAL_REDIRECT_SLASH);
             }
         }
 
         void validate()
         {
-            trie_.validate();
-            for(auto& rule:rules_)
-            {
-                if (rule)
-				{
-					auto upgraded = rule->upgrade();
-					if (upgraded)
-						rule = std::move(upgraded);
-                    rule->validate();
-				}
+          for (auto &p : tries_) {
+            p.second.validate();
+            for (auto &rule:rules_) {
+              if (rule) {
+                auto upgraded = rule->upgrade();
+                if (upgraded)
+                  rule = std::move(upgraded);
+                rule->validate();
+              }
             }
+          }
         }
 
 		template <typename Adaptor> 
 		void handle_upgrade(const request& req, response& res, Adaptor&& adaptor)
 		{
-            auto found = trie_.find(req.url);
+          auto found = tries_[req.method].find(req.url);
             unsigned rule_index = found.first;
             if (!rule_index)
             {
@@ -8482,7 +8494,8 @@ public:
 
         void handle(const request& req, response& res)
         {
-            auto found = trie_.find(req.url);
+
+          auto found = tries_[req.method].find(req.url);
 
             unsigned rule_index = found.first;
 
@@ -8548,12 +8561,14 @@ public:
 
         void debug_print()
         {
-            trie_.debug_print();
+          for (const auto &p:tries_) {
+            p.second.debug_print();
+          }
         }
 
     private:
         std::vector<std::unique_ptr<BaseRule>> rules_;
-        Trie trie_;
+  std::map<HTTPMethod, Trie> tries_;
     };
 }
 
@@ -9512,6 +9527,11 @@ namespace crow
 #define CROW_ROUTE(app, url) app.route_dynamic(url)
 #else
 #define CROW_ROUTE(app, url) app.route<crow::black_magic::get_parameter_tag(url)>(url)
+#define CROW_GET(app, url) app.route<crow::black_magic::get_parameter_tag(url)>(url,"GET"_method).methods("GET"_method)
+#define CROW_POST(app, url) app.route<crow::black_magic::get_parameter_tag(url)>(url,"POST"_method).methods("POST"_method)
+#define CROW_DELETE(app, url) app.route<crow::black_magic::get_parameter_tag(url)>(url,"DELETE"_method).methods("DELETE"_method)
+#define CROW_PUT(app, url) app.route<crow::black_magic::get_parameter_tag(url)>(url,"PUT"_method).methods("PUT"_method)
+#define CROW_OPTIONS(app, url) app.route<crow::black_magic::get_parameter_tag(url)>(url,"OPTIONS"_method).methods("OPTIONS"_method)
 #endif
 
 namespace crow
@@ -9543,9 +9563,9 @@ namespace crow
             router_.handle(req, res);
         }
 
-        DynamicRule& route_dynamic(std::string&& rule)
+      DynamicRule &route_dynamic(std::string &&rule, const HTTPMethod &method)
         {
-            return router_.new_rule_dynamic(std::move(rule));
+          return router_.new_rule_dynamic(std::move(rule), method);
         }
 
         template <uint64_t Tag>
@@ -9554,6 +9574,14 @@ namespace crow
         {
             return router_.new_rule_tagged<Tag>(std::move(rule));
         }
+
+      template<uint64_t Tag>
+      auto route(std::string &&rule, const HTTPMethod &method)
+      -> typename std::result_of<decltype(&Router::new_rule_tagged<Tag>)(Router, std::string && , const
+      HTTPMethod &)>
+      ::type {
+        return router_.new_rule_tagged<Tag>(std::move(rule), method);
+      }
 
         self_t& port(std::uint16_t port)
         {

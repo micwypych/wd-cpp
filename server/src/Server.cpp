@@ -65,7 +65,7 @@ void RunServer() {
   unique_ptr<IdGenerator> generator = make_unique<IncrementalIdGenerator>(100);
 
   SimpleApp app;
-  CROW_ROUTE(app, "/api/hello/<int>")
+  CROW_GET(app, "/api/hello/<int>")
       ([](int count) {
         if (count > 100)
           return crow::response(400);
@@ -74,14 +74,13 @@ void RunServer() {
         return crow::response(os.str());
       });
 
-  CROW_ROUTE(app, "/")
+  CROW_GET(app, "/")
       ([]() {
         mustache::context ctx;
         return mustache::load_text("index.html");
       });
 
-  CROW_ROUTE(app, "/api/student")
-      .methods("GET"_method, "POST"_method)
+  CROW_GET(app, "/api/student")
           ([&students, &generator](const request &req) {
             //TODO at this moment it is imposible to have two crow routes with different methods, I guess...
             //so this ugly solution has to suffice
@@ -111,22 +110,19 @@ void RunServer() {
             }
           });
 
-  CROW_ROUTE(app, "/api/student/<uint>")
-      .methods("DELETE"_method, "POST"_method, "GET"_method)
-          ([&students, &generator](const request &req, unsigned int id) {
-            auto delete_handler = [&students](unsigned int id) {
-              const auto it =
-                  find_if(students.begin(), students.end(), [id](const auto &student) { return student.Id() == id; });
-              if (it != students.end()) {
-                students.erase(it);
-                CROW_LOG_INFO << " - MESSAGE: student of id: " << id << " was found";
-                return response(204);
-              } else {
-                CROW_LOG_INFO << " - MESSAGE: student of id: " << id << " was not found";
-                return response(404);
-              }
-            };
-            auto post_handler = [&students, &generator](const request &req, unsigned int id) {
+  CROW_POST(app, "/api/student")
+      ([&students, &generator](const request &req) {
+        auto x = json::load(req.body);
+        if (!x)
+          return response(400);
+        CROW_LOG_INFO << " - MESSAGE: " << x;
+        Student s = StudentFromJson(generator, x);
+        students.push_back(s);
+        return response(204);
+      });
+
+  CROW_POST(app, "/api/student/<uint>")
+      ([&students, &generator](const request &req, unsigned int id) {
               auto x = json::load(req.body);
               if (!x)
                 return response(400);
@@ -142,8 +138,24 @@ void RunServer() {
                 CROW_LOG_INFO << " - MESSAGE: student of id: " << id << " was not found";
                 return response(404);
               }
-            };
-            auto get_handler = [&students](unsigned int id) {
+      });
+
+  CROW_DELETE(app, "/api/student/<uint>")
+      ([&students](unsigned int id) {
+        const auto it =
+            find_if(students.begin(), students.end(), [id](const auto &student) { return student.Id() == id; });
+        if (it != students.end()) {
+          students.erase(it);
+          CROW_LOG_INFO << " - MESSAGE: student of id: " << id << " was found";
+          return response(204);
+        } else {
+          CROW_LOG_INFO << " - MESSAGE: student of id: " << id << " was not found";
+          return response(404);
+        }
+      });
+
+  CROW_GET(app, "/api/student/<uint>")
+      ([&students](unsigned int id) {
               const auto it =
                   find_if(students.begin(), students.end(), [id](const auto &student) { return student.Id() == id; });
               if (it != students.end()) {
@@ -155,18 +167,9 @@ void RunServer() {
                 CROW_LOG_INFO << " - MESSAGE: student of id: " << id << " was not found";
                 return response(404);
               }
-            };
-            if (req.method == "DELETE"_method) {
-              return delete_handler(id);
-            } else if (req.method == "POST"_method) {
-              return post_handler(req, id);
-            } else if (req.method == "GET"_method) {
-              return get_handler(id);
-            } else {
-              return response(404);
-            }
           });
 
+  logger::setLogLevel(LogLevel::Debug);
   app.port(9876).multithreaded().run();
 }
 
