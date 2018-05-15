@@ -80,35 +80,20 @@ void RunServer() {
         return mustache::load_text("index.html");
       });
 
+  CROW_GET(app, "/create_student.html")
+      ([]() {
+        mustache::context ctx;
+        return mustache::load_text("create_student.html");
+      });
+
   CROW_GET(app, "/api/student")
-          ([&students, &generator](const request &req) {
-            //TODO at this moment it is imposible to have two crow routes with different methods, I guess...
-            //so this ugly solution has to suffice
-            auto get_handler =
-                [&students]() {
+      ([&students]() {
                   json::wvalue x;
                   x = students;
                   std::string json_message = json::dump(x);
                   CROW_LOG_INFO << " - MESSAGE: " << json_message;
                   return response(x);
-                };
-            auto post_handler = [&students, &generator](const request &req) {
-              auto x = json::load(req.body);
-              if (!x)
-                return response(400);
-              CROW_LOG_INFO << " - MESSAGE: " << x;
-              Student s = StudentFromJson(generator, x);
-              students.push_back(s);
-              return response(204);
-            };
-            if (req.method == "GET"_method) {
-              return get_handler();
-            } else if (req.method == "POST"_method) {
-              return post_handler(req);
-            } else {
-              return response(404);
-            }
-          });
+      });
 
   CROW_POST(app, "/api/student")
       ([&students, &generator](const request &req) {

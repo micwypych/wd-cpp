@@ -1,0 +1,15 @@
+<td>NOWY</td>
+<td><input type="text" placeholder="First Name" ng-model="ctrl.newStudent.first_name"></td>
+<td><input type="text" placeholder="Last Name" ng-model="ctrl.newStudent.last_name"></td>
+<td><input type="text" placeholder="Program" ng-model="ctrl.newStudent.program"></td>
+<td><input type="text" placeholder="Age" ng-model="ctrl.newStudent.age"></td>
+<td><input type="text" placeholder="PESEL" ng-model="ctrl.newStudent.pesel"></td>
+<td>
+    <button type="submit" class="btn btn-success" ng-click="ctrl.createStudent()"
+            ng-disabled="newStudentForm.$invalid">
+        <span class="glyphicon glyphicon-plus glyphicon-white"></span>
+    </button>
+    <button type="button" class="btn btn-danger" ng-click="ctrl.cancelCreation()">
+        <span class="remove glyphicon glyphicon-remove-sign glyphicon-white"></span>
+    </button>
+</td>
