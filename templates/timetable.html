@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="wd-timetable">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body ng-controller="TimeTableCtrl as ctrl">
+<div class="container-fluid">
+    <h1>Wirtualny dziekanat 2.0</h1>
+    <p>{{ctrl.mod}}</p>
+    <div class="timetable"></div>
+</div>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-resource.min.js"></script>
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+
+<link rel="stylesheet" href="assets/timetablejs.css">
+
+<script src="assets/timetable.js"></script>
+
+
+<script type="text/javascript">
+    angular.module('wd-timetable', ['ngResource'])
+        .controller('TimeTableCtrl', ['TimeTableItemService', 'TimeTableLocationService', function (Item, Location) {
+            var self = this;
+            self.mod = 'Hello World!';
+            self.locations = [];
+            self.timetable = new Timetable();
+            var resetTimeTable = function () {
+                self.timetable = new Timetable();
+            };
+            var fetchLocations = function () {
+                //self.locations = Location.query();
+                self.locations = ['Loc1', 'Loc2', 'Loc3'];
+                self.timetable.addLocations(self.locations);
+            };
+            var fetchTimeTableItems = function () {
+                //var items = TimeTableItem.query();
+                items = [{
+                    eventname: 'Event1',
+                    location: 'Loc2',
+                    startdate: '2018-05-26T10:00:00Z',
+                    enddate: '2018-05-26T12:00:00Z',
+                    url: '/timetable/item/100'
+                },
+                    {
+                        eventname: 'Event2',
+                        location: 'Loc1',
+                        startdate: '2018-05-26T10:00:00Z',
+                        enddate: '2018-05-26T12:00:00Z',
+                        url: '/timetable/item/101'
+                    },
+                    {
+                        eventname: 'Event3',
+                        location: 'Loc3',
+                        startdate: '2018-05-26T12:00:00Z',
+                        enddate: '2018-05-26T14:00:00Z',
+                        url: '/timetable/item/102'
+                    },
+                    {
+                        eventname: 'Event4',
+                        location: 'Loc3',
+                        startdate: '2018-05-26T10:00:00Z',
+                        enddate: '2018-05-26T12:00:00Z',
+                        url: '/timetable/item/103'
+                    }];
+                for (item in self.ttitems) {
+                    self.timetable.addEvent(item.eventname, item.location, new Date(item.startdate), new Date(item.enddate), item.url);
+                }
+            };
+            var renderTimeTable = function () {
+                var renderer = new Timetable.Renderer(self.timetable);
+                renderer.draw('.timetable');
+            };
+            var fetchTimeTable = function () {
+                resetTimeTable();
+                fetchLocations();
+                fetchTimeTableItems();
+                renderTimeTable();
+            }
+
+            fetchTimeTable();
+        }])
+        .factory('TimeTableItemService', ['$resource', function ($resource) {
+            return $resource('/api/timetable/item/:id', {id: '@id'});
+        }])
+        .factory('TimeTableLocationService', ['$resource', function ($resource) {
+            return $resource('/api/timetable/location/:id', {id: '@id'});
+        }])
+        .factory('TimeTableOfTeacherService', ['$resource', function ($resource) {
+            return $resource('/api/timetable/schedule/teacher/:id', {id: '@id'});
+        }])
+        .factory('TimeTableOfRoomService', ['$resource', function ($resource) {
+            return $resource('/api/timetable/schedule/room/:id', {id: '@id'});
+        }])
+        .factory('TimeTableOfYearService', ['$resource', function ($resource) {
+            return $resource('/api/timetable/schedule/year/:year', {year: '@year'});
+        }]);
+</script>
+</body>
+
+</html>

@@ -86,6 +86,24 @@ void RunServer() {
         return mustache::load_text("create_student.html");
       });
 
+  CROW_GET(app, "/timetable.html")
+      ([]() {
+        mustache::context ctx;
+        return mustache::load_text("timetable.html");
+      });
+
+  CROW_GET(app, "/assets/timetable.js")
+      ([]() {
+        mustache::context ctx;
+        return mustache::load_text("assets/timetable.js");
+      });
+
+  CROW_GET(app, "/assets/timetablejs.css")
+      ([]() {
+        mustache::context ctx;
+        return mustache::load_text("assets/timetablejs.css");
+      });
+
   CROW_GET(app, "/api/student")
       ([&students]() {
                   json::wvalue x;
