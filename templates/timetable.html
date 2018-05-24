@@ -8,7 +8,16 @@
 <div class="container-fluid">
     <h1>Wirtualny dziekanat 2.0</h1>
     <p>{{ctrl.mod}}</p>
-    <div class="timetable"></div>
+    <h3>Monday</h3>
+    <div id="ttmonday" class="timetable"></div>
+    <h3>Tuesday</h3>
+    <div id="tttuesday" class="timetable"></div>
+    <h3>Wednesday</h3>
+    <div id="ttwednesday" class="timetable"></div>
+    <h3>Thursday</h3>
+    <div id="ttthursday" class="timetable"></div>
+    <h3>Friday</h3>
+    <div id="ttfriday" class="timetable"></div>
 </div>
 
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -31,59 +40,85 @@
             var self = this;
             self.mod = 'Hello World!';
             self.locations = [];
-            self.timetable = new Timetable();
+            self.dayTimeTable = [];
+            var forEachTimeTableExecute = function (foo) {
+                for (var i = 0; i < self.dayTimeTable.length; i++) {
+                    foo(self.dayTimeTable[i], i);
+                }
+            };
             var resetTimeTable = function () {
-                self.timetable = new Timetable();
+                for (var i = 0; i < 5; i++) {
+                    self.dayTimeTable[i] = new Timetable();
+                }
             };
             var fetchLocations = function () {
                 //self.locations = Location.query();
                 self.locations = ['Loc1', 'Loc2', 'Loc3'];
-                self.timetable.addLocations(self.locations);
+                forEachTimeTableExecute(function (t, i) {
+                    t.addLocations(self.locations);
+                });
+            };
+            var addEventsToTimeTable = function (timeTable, events) {
+                for (var i = 0; i < events.length; i++) {
+                    var item = events[i];
+                    timeTable.addEvent(item.eventname, item.location, new Date(item.startdate), new Date(item.enddate), item.url);
+                }
             };
             var fetchTimeTableItems = function () {
                 //var items = TimeTableItem.query();
-                items = [{
+                var items = [{
                     eventname: 'Event1',
                     location: 'Loc2',
-                    startdate: '2018-05-26T10:00:00Z',
-                    enddate: '2018-05-26T12:00:00Z',
+                    startdate: '2018-05-23T10:00:00Z',
+                    enddate: '2018-05-23T12:00:00Z',
                     url: '/timetable/item/100'
                 },
                     {
                         eventname: 'Event2',
                         location: 'Loc1',
-                        startdate: '2018-05-26T10:00:00Z',
-                        enddate: '2018-05-26T12:00:00Z',
+                        startdate: '2018-05-23T10:00:00Z',
+                        enddate: '2018-05-23T12:00:00Z',
                         url: '/timetable/item/101'
                     },
                     {
                         eventname: 'Event3',
                         location: 'Loc3',
-                        startdate: '2018-05-26T12:00:00Z',
-                        enddate: '2018-05-26T14:00:00Z',
+                        startdate: '2018-05-16T12:00:00Z',
+                        enddate: '2018-05-16T14:00:00Z',
                         url: '/timetable/item/102'
                     },
                     {
                         eventname: 'Event4',
                         location: 'Loc3',
-                        startdate: '2018-05-26T10:00:00Z',
-                        enddate: '2018-05-26T12:00:00Z',
+                        startdate: '2018-05-16T10:00:00Z',
+                        enddate: '2018-05-16T12:00:00Z',
                         url: '/timetable/item/103'
                     }];
-                for (item in self.ttitems) {
-                    self.timetable.addEvent(item.eventname, item.location, new Date(item.startdate), new Date(item.enddate), item.url);
-                }
+//                for (var i =0; i < items.length; i++) {
+//                    var item = items[i];
+//                    self.timetable.addEvent(item.eventname, item.location, new Date(item.startdate), new Date(item.enddate), item.url);
+//                }
+                var eventsPerDay = [items, [], [], items, []];
+                forEachTimeTableExecute(function (timetable, i) {
+                    addEventsToTimeTable(timetable, eventsPerDay[i]);
+                });
             };
-            var renderTimeTable = function () {
-                var renderer = new Timetable.Renderer(self.timetable);
-                renderer.draw('.timetable');
+            var renderTimeTable = function (timetable, placeholdername) {
+                var renderer = new Timetable.Renderer(timetable);
+                renderer.draw(placeholdername);
+            };
+            var renderTimeTables = function () {
+                var days = ['#ttmonday', '#tttuesday', '#ttwednesday', '#ttthursday', '#ttfriday'];
+                forEachTimeTableExecute(function (timetable, i) {
+                    renderTimeTable(timetable, days[i]);
+                });
             };
             var fetchTimeTable = function () {
                 resetTimeTable();
                 fetchLocations();
                 fetchTimeTableItems();
-                renderTimeTable();
-            }
+                renderTimeTables();
+            };
 
             fetchTimeTable();
         }])
