@@ -69,6 +69,12 @@ void RunServer() {
         return mustache::load_text("create_student.html");
       });
 
+  CROW_GET(app, "/create_object.html")
+      ([]() {
+        mustache::context ctx;
+        return mustache::load_text("create_object.html");
+      });
+
   CROW_GET(app, "/timetable.html")
       ([]() {
         mustache::context ctx;
