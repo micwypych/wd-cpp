@@ -9,11 +9,24 @@
     <h1>Wirtualny dziekanat 2.0</h1>
     <p>{{ctrl.mod}}</p>
 
-    <object-view object-name="'Panel Studentów'"
-                 column-headers-with-id="ctrl.columnHeaders"
-                 field-names-but-id="ctrl.fieldNamesButId"
-                 object-service="ctrl.StudentService">
-    </object-view>
+    <ul>
+        <li><a href="#!">Strona główna</a></li>
+        <li><a href="#!/student">Panel Studentów</a></li>
+        <li><a href="#!/teacher">Panel Nauczycieli Akademickich</a></li>
+        <li><a href="#!/building">Panel Budynków i Sal</a></li>
+        <li><a href="#!/room">Panel Sal</a></li>
+        <li><a href="#!/program">Panel Programów Studiów</a></li>
+        <li><a href="#!/course">Panel Oferowanych Kursów</a></li>
+        <li><a href="timetable.html">Aktualny plan zajęć</a></li>
+    </ul>
+
+    <div ng-view></div>
+
+    <!--<object-view object-name="'Panel Studentów'"-->
+    <!--column-headers-with-id="ctrl.columnHeaders"-->
+    <!--field-names-but-id="ctrl.fieldNamesButId"-->
+    <!--object-service="ctrl.StudentService">-->
+    <!--</object-view>-->
 </div>
 
 
@@ -23,21 +36,103 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-resource.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-route.min.js"></script>
 <!-- Latest compiled JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
 
 <script type="text/javascript">
-    angular.module('wd-students', ['ngResource'])
-        .controller('StudentCtrl', ['StudentService', function (studentSrv) {
+    angular.module('wd-students', ['ngResource', 'ngRoute'])
+        .config(['$routeProvider', function ($routerProvider) {
+            $routerProvider.when('/', {
+                template: '<object-view object-name="ctrl.pageName" column-headers-with-id="ctrl.columnHeaders" field-names-but-id="ctrl.fieldNamesButId" object-service="ctrl.Service"></object-view>',
+                controller: 'StudentCtrl',
+                controllerAs: 'ctrl'
+            }).when('/student', {
+                template: '<object-view object-name="ctrl.pageName" column-headers-with-id="ctrl.columnHeaders" field-names-but-id="ctrl.fieldNamesButId" object-service="ctrl.Service"></object-view>',
+                controller: 'StudentCtrl',
+                controllerAs: 'ctrl'
+            }).when('/teacher', {
+                template: '<object-view object-name="ctrl.pageName" column-headers-with-id="ctrl.columnHeaders" field-names-but-id="ctrl.fieldNamesButId" object-service="ctrl.Service"></object-view>',
+                controller: 'TeacherCtrl',
+                controllerAs: 'ctrl'
+            }).when('/building', {
+                template: '<object-view object-name="ctrl.pageName" column-headers-with-id="ctrl.columnHeaders" field-names-but-id="ctrl.fieldNamesButId" object-service="ctrl.Service"></object-view>',
+                controller: 'BuildingCtrl',
+                controllerAs: 'ctrl'
+            }).when('/room', {
+                template: '<object-view object-name="ctrl.pageName" column-headers-with-id="ctrl.columnHeaders" field-names-but-id="ctrl.fieldNamesButId" object-service="ctrl.Service"></object-view>',
+                controller: 'RoomCtrl',
+                controllerAs: 'ctrl'
+            }).when('/program', {
+                template: '<object-view object-name="ctrl.pageName" column-headers-with-id="ctrl.columnHeaders" field-names-but-id="ctrl.fieldNamesButId" object-service="ctrl.Service"></object-view>',
+                controller: 'ProgramCtrl',
+                controllerAs: 'ctrl'
+            }).when('/course', {
+                template: '<object-view object-name="ctrl.pageName" column-headers-with-id="ctrl.columnHeaders" field-names-but-id="ctrl.fieldNamesButId" object-service="ctrl.Service"></object-view>',
+                controller: 'CourseCtrl',
+                controllerAs: 'ctrl'
+            }).otherwise({redirectTo: '/'});
+        }])
+        .controller('StudentCtrl', ['StudentService', function (srv) {
             var self = this;
-            self.mod = 'Hello World!';
-            self.columnHeaders = ['#', 'First Name', 'Last Name', 'Program', 'Age', 'PESEL'];
+            self.pageName = 'Panel Studentów';
+            self.columnHeaders = ['#', 'Imię', 'Nazwisko', 'Kierunek', 'Wiek', 'PESEL'];
             self.fieldNamesButId = ['first_name', 'last_name', 'program', 'age', 'pesel'];
-            self.StudentService = studentSrv;
+            self.Service = srv;
+        }])
+        .controller('TeacherCtrl', ['TeacherService', function (srv) {
+            var self = this;
+            self.pageName = 'Panel Nauczycieli Akademickich';
+            self.columnHeaders = ['#', 'Imię', 'Nazwisko', ['Prowadzone kursy']];
+            self.fieldNamesButId = ['first_name', 'last_name', 'courses'];
+            self.Service = srv;
+        }])
+        .controller('BuildingCtrl', ['BuildingService', function (srv) {
+            var self = this;
+            self.pageName = 'Panel Budynków i Sal';
+            self.columnHeaders = ['#', 'Nazwa Budynku', ['Pomieszczenia']];
+            self.fieldNamesButId = ['name', 'rooms'];
+            self.Service = srv;
+        }])
+        .controller('RoomCtrl', ['RoomService', function (srv) {
+            var self = this;
+            self.pageName = 'Panel Sal';
+            self.columnHeaders = ['#', 'Room Name', 'Building', 'Type'];
+            self.fieldNamesButId = ['name', 'building', 'type'];
+            self.Service = srv;
+        }])
+        .controller('ProgramCtrl', ['ProgramService', function (srv) {
+            var self = this;
+            self.pageName = 'Panel Programów Studiów';
+            self.columnHeaders = ['#', 'Program', 'Semester', ['Courses']];
+            self.fieldNamesButId = ['program', 'semester', 'courses'];
+            self.Service = srv;
+        }])
+        .controller('CourseCtrl', ['CourseService', function (srv) {
+            var self = this;
+            self.pageName = 'Panel Oferowanych Kursów';
+            self.columnHeaders = ['#', 'Course Name', 'ECTS', 'Teaching Language', 'Teacher\'s Name and Surname', 'Program', 'Semester', 'Room'];
+            self.fieldNamesButId = ['name', 'ects', 'teaching_language', 'teachers_name_surname', 'program', 'semester', 'room'];
+            self.Service = srv;
         }])
         .factory('StudentService', ['$resource', function ($resource) {
             return $resource('/api/student/:id', {id: '@id'});
+        }])
+        .factory('TeacherService', ['$resource', function ($resource) {
+            return $resource('/api/teacher/:id', {id: '@id'});
+        }])
+        .factory('BuildingService', ['$resource', function ($resource) {
+            return $resource('/api/building/:id', {id: '@id'});
+        }])
+        .factory('RoomService', ['$resource', function ($resource) {
+            return $resource('/api/building/:id', {id: '@id'});
+        }])
+        .factory('ProgramService', ['$resource', function ($resource) {
+            return $resource('/api/program/:id', {id: '@id'});
+        }])
+        .factory('CourseService', ['$resource', function ($resource) {
+            return $resource('/api/course/:id', {id: '@id'});
         }])
         .filter('AddEdited', [function () {
             return function (obj) {
