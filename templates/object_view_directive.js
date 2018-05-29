@@ -1,16 +1,21 @@
 /**
  * Created by mwypych on 29/05/18.
  */
-angular.module('wd-students').directive('objectView', ['StudentService', 'AddEditedFilter', function (Student, AddEditedFilter) {
+angular.module('wd-students').directive('objectView', ['AddEditedFilter', function (AddEditedFilter) {
     return {
         templateUrl: 'object_view.html',
         restrict: 'AE',
+        scope: {
+            objectName: '=objectName',
+            fieldNamesColumnHeaders: '=columnHeadersWithId',
+            fieldNamesButIdToRetrieve: '=fieldNamesButId',
+            objectService: '=objectService'
+        },
         link: function ($scope, $element, $attrs) {
             var self = $scope;
+            var Student = self.objectService;
             self.students = [];
-            self.fieldNamesColumnHeaders = ['#', 'First Name', 'Last Name', 'Program', 'Age', 'PESEL'];
-            self.fieldNamesToRetrieve = ['id', 'first_name', 'last_name', 'program', 'age', 'pesel'];
-            self.fieldNamesButIdToRetrieve = ['first_name', 'last_name', 'program', 'age', 'pesel'];
+            self.fieldNamesToRetrieve = ['id'].concat(self.fieldNamesButIdToRetrieve);
             self.newStudent = {};
             self.editedStudents = {};
             var fetchStudents = function () {
