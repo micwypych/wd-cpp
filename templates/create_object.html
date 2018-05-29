@@ -1,13 +1,13 @@
 <td>NOWY</td>
-<td ng-repeat="fieldName in ctrl.fieldNamesButIdToRetrieve"><input type="text"
-                                                                   placeholder="{{ctrl.fieldNamesColumnHeaders[$index+1]}}"
-                                                                   ng-model="ctrl.newStudent[fieldName]"></td>
+<td ng-repeat="fieldName in fieldNamesButIdToRetrieve"><input type="text"
+                                                              placeholder="{{fieldNamesColumnHeaders[$index+1]}}"
+                                                              ng-model="newStudent[fieldName]"></td>
 <td>
-    <button type="submit" class="btn btn-success" ng-click="ctrl.createStudent()"
+    <button type="submit" class="btn btn-success" ng-click="createStudent()"
             ng-disabled="newStudentForm.$invalid">
         <span class="glyphicon glyphicon-plus glyphicon-white"></span>
     </button>
-    <button type="button" class="btn btn-danger" ng-click="ctrl.cancelCreation()">
+    <button type="button" class="btn btn-danger" ng-click="cancelCreation()">
         <span class="remove glyphicon glyphicon-remove-sign glyphicon-white"></span>
     </button>
 </td>
