@@ -71,53 +71,11 @@
         </form>
     </div>
 
-    <div class="table-responsive">
-        <form name="newStudentForm">
-            <table class="table table-hover table-condensed">
-                <thead>
-                <tr>
-                    <th ng-repeat="fieldName in ctrl.fieldNamesColumnHeaders" ng-bind="::fieldName"></th>
-                </tr>
-                </thead>
-                <tbody ng-repeat="student in ctrl.students">
-                <tr ng-if="!student.edited">
-                    <td ng-repeat="fieldName in ctrl.fieldNamesToRetrieve" ng-bind="$parent.student[fieldName]"></td>
-                    <td>
-                        <button type="button" class="btn btn-success" ng-click="ctrl.editStudent(student.id)">
-                            <span class="glyphicon glyphicon-edit glyphicon-white"></span>
-                        </button>
-                        <button type="button" class="btn btn-danger" ng-click="ctrl.deleteStudent(student)">
-                            <span class="remove glyphicon glyphicon-remove-sign glyphicon-white"></span>
-                        </button>
-                    </td>
-                </tr>
-                <tr ng-if="student.edited">
-                    <td ng-bind="::student.id"></td>
-                    <td ng-repeat="fieldName in ctrl.fieldNamesButIdToRetrieve"><input type="text"
-                                                                                       ng-value="$parent.student[fieldName]"
-                                                                                       ng-model="ctrl.editedStudents[$parent.student.id][fieldName]">
-                    </td>
-                    <td>
-                        <button type="submit" class="btn btn-success" ng-click="ctrl.modifyStudent(student.id)"
-                                ng-disabled="newStudentForm.$invalid">
-                            <span class="glyphicon glyphicon-ok glyphicon-white"></span>
-                        </button>
-                        <button type="button" class="btn btn-danger" ng-click="ctrl.cancelEditionOf(student.id)">
-                            <span class="remove glyphicon glyphicon-remove-sign glyphicon-white"></span>
-                        </button>
-                    </td>
-                </tr>
-                <tr ng-if="$last" ng-include="'create_object.html'">
-                </tr>
-                </tbody>
-                <tbody ng-if="!ctrl.students.length">
-                <tr ng-include="'create_object.html'">
-                </tr>
-                </tbody>
-            </table>
-        </form>
+    <div object-view>
     </div>
 </div>
+
+
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 <!-- jQuery library -->
@@ -232,5 +190,6 @@
             };
         }]);
 </script>
+<script src="object_view_directive.js"></script>
 </body>
 </html>

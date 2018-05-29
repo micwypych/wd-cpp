@@ -63,6 +63,18 @@ void RunServer() {
         return mustache::load_text("index.html");
       });
 
+  CROW_GET(app, "/object_view.html")
+      ([]() {
+        mustache::context ctx;
+        return mustache::load_text("object_view.html");
+      });
+
+  CROW_GET(app, "/object_view_directive.js")
+      ([]() {
+        mustache::context ctx;
+        return mustache::load_text("object_view_directive.js");
+      });
+
   CROW_GET(app, "/create_student.html")
       ([]() {
         mustache::context ctx;
