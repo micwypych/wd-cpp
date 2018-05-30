@@ -33,31 +33,31 @@
     angular.module('wd-students', ['ngResource', 'ngRoute'])
         .config(['$routeProvider', function ($routerProvider) {
             $routerProvider.when('/', {
-                template: '<object-view object-name="ctrl.pageName" column-headers-with-id="ctrl.columnHeaders" field-names-but-id="ctrl.fieldNamesButId" object-service="ctrl.Service"></object-view>',
+                templateUrl: 'object_view_widget.html',
                 controller: 'StudentCtrl',
                 controllerAs: 'ctrl'
             }).when('/student', {
-                template: '<object-view object-name="ctrl.pageName" column-headers-with-id="ctrl.columnHeaders" field-names-but-id="ctrl.fieldNamesButId" object-service="ctrl.Service"></object-view>',
+                templateUrl: 'object_view_widget.html',
                 controller: 'StudentCtrl',
                 controllerAs: 'ctrl'
             }).when('/teacher', {
-                template: '<object-view object-name="ctrl.pageName" column-headers-with-id="ctrl.columnHeaders" field-names-but-id="ctrl.fieldNamesButId" object-service="ctrl.Service"></object-view>',
+                templateUrl: 'object_view_widget.html',
                 controller: 'TeacherCtrl',
                 controllerAs: 'ctrl'
             }).when('/building', {
-                template: '<object-view object-name="ctrl.pageName" column-headers-with-id="ctrl.columnHeaders" field-names-but-id="ctrl.fieldNamesButId" object-service="ctrl.Service"></object-view>',
+                templateUrl: 'object_view_widget.html',
                 controller: 'BuildingCtrl',
                 controllerAs: 'ctrl'
             }).when('/room', {
-                template: '<object-view object-name="ctrl.pageName" column-headers-with-id="ctrl.columnHeaders" field-names-but-id="ctrl.fieldNamesButId" object-service="ctrl.Service"></object-view>',
+                templateUrl: 'object_view_widget.html',
                 controller: 'RoomCtrl',
                 controllerAs: 'ctrl'
             }).when('/program', {
-                template: '<object-view object-name="ctrl.pageName" column-headers-with-id="ctrl.columnHeaders" field-names-but-id="ctrl.fieldNamesButId" object-service="ctrl.Service"></object-view>',
+                templateUrl: 'object_view_widget.html',
                 controller: 'ProgramCtrl',
                 controllerAs: 'ctrl'
             }).when('/course', {
-                template: '<object-view object-name="ctrl.pageName" column-headers-with-id="ctrl.columnHeaders" field-names-but-id="ctrl.fieldNamesButId" object-service="ctrl.Service"></object-view>',
+                templateUrl: 'object_view_widget.html',
                 controller: 'CourseCtrl',
                 controllerAs: 'ctrl'
             }).otherwise({redirectTo: '/'});
