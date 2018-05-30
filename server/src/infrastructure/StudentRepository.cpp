@@ -72,7 +72,7 @@ StudentRepository::OptionalMutableStudent StudentRepository::FindById(StudentRep
 }
 
 void StudentRepository::Delete(StudentRepository::StudentId id) {
-  if (id != Student::UNKNOWN_ID) {
+  if (id == Student::UNKNOWN_ID) {
     throw invalid_argument{"When deleting Student from repository its id should be set!"};
   }
   //FIXME: concurrent access - not safe!
