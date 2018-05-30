@@ -7,6 +7,7 @@
           integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
           integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+    <link rel="stylesheet" href="assets/timetablejs.css">
 </head>
 <body>
 <div class="container-fluid">
@@ -27,6 +28,8 @@
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-resource.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-route.min.js"></script>
+
+<script src="assets/timetable.js"></script>
 
 
 <script type="text/javascript">
@@ -59,6 +62,10 @@
             }).when('/course', {
                 templateUrl: 'object_view_widget.html',
                 controller: 'CourseCtrl',
+                controllerAs: 'ctrl'
+            }).when('/timetable', {
+                templateUrl: 'timetable_widget.html',
+                controller: 'TimeTableCtrl',
                 controllerAs: 'ctrl'
             }).otherwise({redirectTo: '/'});
         }])
@@ -104,6 +111,88 @@
             self.fieldNamesButId = ['name', 'ects', 'teaching_language', 'teachers_name_surname', 'program', 'semester', 'room'];
             self.Service = srv;
         }])
+        .controller('TimeTableCtrl', ['TimeTableItemService', 'TimeTableLocationService', function (Item, Location) {
+            var self = this;
+            self.mod = 'Hello World!';
+            self.locations = [];
+            self.dayTimeTable = [];
+            var forEachTimeTableExecute = function (foo) {
+                for (var i = 0; i < self.dayTimeTable.length; i++) {
+                    foo(self.dayTimeTable[i], i);
+                }
+            };
+            var resetTimeTable = function () {
+                for (var i = 0; i < 5; i++) {
+                    self.dayTimeTable[i] = new Timetable();
+                }
+            };
+            var fetchLocations = function () {
+                //self.locations = Location.query();
+                self.locations = ['Loc1', 'Loc2', 'Loc3'];
+                forEachTimeTableExecute(function (t, i) {
+                    t.addLocations(self.locations);
+                });
+            };
+            var addEventsToTimeTable = function (timeTable, events) {
+                for (var i = 0; i < events.length; i++) {
+                    var item = events[i];
+                    timeTable.addEvent(item.eventname, item.location, new Date(item.startdate), new Date(item.enddate), item.url);
+                }
+            };
+            var fetchTimeTableItems = function () {
+                //var items = TimeTableItem.query();
+                var items = [{
+                    eventname: 'Event1',
+                    location: 'Loc2',
+                    startdate: '2018-05-23T10:00:00Z',
+                    enddate: '2018-05-23T12:00:00Z',
+                    url: '/timetable/item/100'
+                },
+                    {
+                        eventname: 'Event2',
+                        location: 'Loc1',
+                        startdate: '2018-05-23T10:00:00Z',
+                        enddate: '2018-05-23T12:00:00Z',
+                        url: '/timetable/item/101'
+                    },
+                    {
+                        eventname: 'Event3',
+                        location: 'Loc3',
+                        startdate: '2018-05-16T12:00:00Z',
+                        enddate: '2018-05-16T14:00:00Z',
+                        url: '/timetable/item/102'
+                    },
+                    {
+                        eventname: 'Event4',
+                        location: 'Loc3',
+                        startdate: '2018-05-16T10:00:00Z',
+                        enddate: '2018-05-16T12:00:00Z',
+                        url: '/timetable/item/103'
+                    }];
+                var eventsPerDay = [items, [], [], items, []];
+                forEachTimeTableExecute(function (timetable, i) {
+                    addEventsToTimeTable(timetable, eventsPerDay[i]);
+                });
+            };
+            var renderTimeTable = function (timetable, placeholdername) {
+                var renderer = new Timetable.Renderer(timetable);
+                renderer.draw(placeholdername);
+            };
+            var renderTimeTables = function () {
+                var days = ['#ttmonday', '#tttuesday', '#ttwednesday', '#ttthursday', '#ttfriday'];
+                forEachTimeTableExecute(function (timetable, i) {
+                    renderTimeTable(timetable, days[i]);
+                });
+            };
+            var fetchTimeTable = function () {
+                resetTimeTable();
+                fetchLocations();
+                fetchTimeTableItems();
+                renderTimeTables();
+            };
+
+            fetchTimeTable();
+        }])
         .factory('StudentService', ['$resource', function ($resource) {
             return $resource('/api/student/:id', {id: '@id'});
         }])
@@ -121,6 +210,12 @@
         }])
         .factory('CourseService', ['$resource', function ($resource) {
             return $resource('/api/course/:id', {id: '@id'});
+        }])
+        .factory('TimeTableItemService', ['$resource', function ($resource) {
+            return $resource('/api/timetable/item/:id', {id: '@id'});
+        }])
+        .factory('TimeTableLocationService', ['$resource', function ($resource) {
+            return $resource('/api/timetable/location/:id', {id: '@id'});
         }])
         .filter('AddEdited', [function () {
             return function (obj) {
