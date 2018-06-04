@@ -19,7 +19,8 @@ before_install:
   - sudo apt-get install libboost-all-dev
   - curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
   - sudo apt-get install -y nodejs
-  - sudo apt-get install npm
+  - node -v
+  - npm -v
   - sudo npm install -g yarn
   - sudo npm install -g karma-cli
   - cd templates
