@@ -23,17 +23,22 @@ install:
   - sudo apt-get install libboost-all-dev
   - sudo apt-get install nodejs
   - sudo apt-get install npm
+  - npm install -g yarn
   - sudo npm install -g karma-cli
   - cd templates
-  - npm install karma
-  - npm install jasmine-core --save-dev
-  - npm install karma-jasmine karma-chrome-launcher
+  - yarn
 
 script:
   - echo `which $CXX`
+  - cwd
+  - cd templates
+  - karma start &
+  - karma run
+  - cd ..
   - mkdir build && cd build
   - cmake -DCMAKE_CXX_COMPILER=$CXX ..
   - make server
+  
 
 notifications:
   email: false
