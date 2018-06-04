@@ -168,7 +168,7 @@ angular.module('wd-students', ['ngResource', 'ngRoute'])
         return $resource('/api/building/:id', {id: '@id'});
     }])
     .factory('RoomService', ['$resource', function ($resource) {
-        return $resource('/api/building/:id', {id: '@id'});
+        return $resource('/api/room/:id', {id: '@id'});
     }])
     .factory('ProgramService', ['$resource', function ($resource) {
         return $resource('/api/program/:id', {id: '@id'});
