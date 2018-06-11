@@ -1,7 +1,20 @@
 <td>NOWY</td>
-<td ng-repeat="fieldName in fieldNamesButIdToRetrieve"><input type="text"
-                                                              placeholder="{{fieldNamesColumnHeaders[$index+1]}}"
-                                                              ng-model="newStudent[fieldName]"></td>
+<td ng-repeat="fieldName in fieldNamesButIdToRetrieve">
+    <span ng-bind="$parent.newStudent[fieldName]"></span>
+    <ul ng-if="columnIsArray[$index+1]">
+        <li ng-bing="value" ng-repeat="value in $parent.newStudent[fieldName]"></li>
+    </ul>
+    <input ng-if="columnIsArray[$index+1]" type="text"
+           placeholder="{{fieldNamesColumnHeaders[$index+1]}}"
+           ng-model="newStudentLastField[fieldName]">
+    <button ng-if="columnIsArray[$index+1]" type="button" class="btn btn-success"
+            ng-click="appendArrayField(fieldName)">
+        <i class="fas fa-plus-circle"></i>
+    </button>
+    <input ng-if="!columnIsArray[$index+1]" type="text"
+           placeholder="{{fieldNamesColumnHeaders[$index+1]}}"
+           ng-model="newStudent[fieldName]">
+</td>
 <td>
     <button type="submit" class="btn btn-success" ng-click="createStudent()"
             ng-disabled="newStudentForm.$invalid">

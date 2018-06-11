@@ -44,7 +44,7 @@ angular.module('wd-students', ['ngResource', 'ngRoute'])
     .controller('TeacherCtrl', ['TeacherService', function (srv) {
         var self = this;
         self.pageName = 'Panel Nauczycieli Akademickich';
-        self.columnHeaders = ['#', 'Imię', 'Nazwisko', ['Prowadzone kursy']];
+        self.columnHeaders = ['#', 'Imię', 'Nazwisko', '[Prowadzone kursy]'];
         self.fieldNamesButId = ['first_name', 'last_name', 'courses'];
         self.Service = srv;
     }])

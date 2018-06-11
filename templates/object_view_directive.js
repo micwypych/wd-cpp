@@ -7,7 +7,7 @@ angular.module('wd-students').directive('objectView', ['AddEditedFilter', functi
         restrict: 'AE',
         scope: {
             objectName: '=objectName',
-            fieldNamesColumnHeaders: '=columnHeadersWithId',
+            fieldNamesColumnHeadersOrig: '=columnHeadersWithId',
             fieldNamesButIdToRetrieve: '=fieldNamesButId',
             objectService: '=objectService'
         },
@@ -15,8 +15,16 @@ angular.module('wd-students').directive('objectView', ['AddEditedFilter', functi
             var self = $scope;
             var Student = self.objectService;
             self.students = [];
+            self.fieldNamesColumnHeaders = self.fieldNamesColumnHeadersOrig;
+            var pattern = /\[([^\]]+)\]/gm;
+            self.columnIsArray = self.fieldNamesColumnHeadersOrig.map(function (name) {
+                if (name instanceof Array)
+                    return true;
+                return name.match(pattern) !== null;
+            });
             self.fieldNamesToRetrieve = ['id'].concat(self.fieldNamesButIdToRetrieve);
             self.newStudent = {};
+            self.newStudentLastField = {};
             self.editedStudents = {};
             var fetchStudents = function () {
                 self.students = Student.query();
@@ -97,6 +105,15 @@ angular.module('wd-students').directive('objectView', ['AddEditedFilter', functi
             self.cancelCreation = function () {
                 console.log('try to cancel creation of new student');
                 resetNewStudent();
+            };
+            self.appendArrayField = function (fieldName) {
+                console.log('appending field: ' + fieldName);
+                if (!self.newStudent[fieldName])
+                    self.newStudent[fieldName] = [];
+                console.log('before ' + self.newStudent[fieldName].toString());
+                self.newStudent[fieldName].push(self.newStudentLastField[fieldName]);
+                console.log('after ' + self.newStudent[fieldName].toString());
+                self.newStudentLastField[fieldName] = "";
             };
 
             fetchStudents();
