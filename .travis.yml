@@ -1,6 +1,8 @@
 sudo: required
 dist: trusty
 language: cpp
+addons:
+  chrome: stable
 
 matrix:
   include:
@@ -39,8 +41,7 @@ script:
   - echo `which $CXX`
   - pwd
   - cd templates
-  - karma start &
-  - karma run
+  - npm test
   - cd ..
   - mkdir build && cd build
   - cmake -DCMAKE_CXX_COMPILER=$CXX ..

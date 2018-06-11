@@ -23,5 +23,8 @@
     "karma-chrome-launcher": "^2.2.0",
     "karma-jasmine": "^1.1.2",
     "popper.js": "1.14.3"
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/karma start --single-run --browsers Chrome"
   }
 }
