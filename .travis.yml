@@ -26,6 +26,9 @@ before_install:
   - sudo npm install -g karma-cli
   - cd templates
   - yarn
+  - ls .
+  - ls **/*
+  - cd ..
 
 install:
   - echo `which $CC`
