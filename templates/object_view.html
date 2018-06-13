@@ -1,47 +1,55 @@
 <div class="table-responsive">
     <h3 ng-bind="::objectName"></h3>
     <form name="newStudentForm">
-        <table class="table table-hover table-condensed">
-            <thead>
-            <tr>
-                <th ng-repeat="fieldName in fieldNamesColumnHeaders" ng-bind="::fieldName"></th>
-            </tr>
-            </thead>
-            <tbody ng-repeat="student in students">
-            <tr ng-if="!student.edited">
-                <td ng-repeat="fieldName in fieldNamesToRetrieve" ng-bind="$parent.student[fieldName]"></td>
-                <td>
-                    <button type="button" class="btn btn-success" ng-click="editStudent(student.id)">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button type="button" class="btn btn-danger" ng-click="deleteStudent(student)">
-                        <i class="fas fa-times-circle"></i>
-                    </button>
-                </td>
-            </tr>
-            <tr ng-if="student.edited">
-                <td ng-bind="::student.id"></td>
-                <td ng-repeat="fieldName in fieldNamesButIdToRetrieve"><input type="text"
-                                                                              ng-value="$parent.student[fieldName]"
-                                                                              ng-model="editedStudents[$parent.student.id][fieldName]">
-                </td>
-                <td>
-                    <button type="submit" class="btn btn-success" ng-click="modifyStudent(student.id)"
-                            ng-disabled="newStudentForm.$invalid">
-                        <i class="fas fa-check-circle"></i>
-                    </button>
-                    <button type="button" class="btn btn-danger" ng-click="cancelEditionOf(student.id)">
-                        <i class="fas fa-undo-alt"></i>
-                    </button>
-                </td>
-            </tr>
-            <tr ng-if="$last" ng-include="'create_object.html'">
-            </tr>
-            </tbody>
-            <tbody ng-if="!students.length">
-            <tr ng-include="'create_object.html'">
-            </tr>
-            </tbody>
-        </table>
+        <div class="container-fluid table-hover table-condensed">
+            <div class="row">
+                <div class="col" ng-repeat="fieldName in fieldNamesColumnHeaders" ng-bind="::fieldName"></div>
+                <div class="col"></div>
+            </div>
+            <div class="table-body" ng-repeat="student in students">
+                <div class="row" ng-if="!student.edited">
+                    <div class="col" ng-repeat="fieldName in fieldNamesToRetrieve">
+                        <div ng-if="columnIsArray[$index+1]" ng-repeat="value in $parent.student[fieldName]">
+                            <span ng-bind="value"></span>
+                        </div>
+                        <span ng-if="!columnIsArray[$index+1]" ng-bind="$parent.student[fieldName]"></span>
+                    </div>
+                    <div class="col">
+                        <button type="button" class="btn btn-success" ng-click="editStudent(student.id)">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button type="button" class="btn btn-danger" ng-click="deleteStudent(student)">
+                            <i class="fas fa-times-circle"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="row" ng-if="student.edited">
+                    <div class="row" ng-bind="::student.id"></div>
+                    <div class="row" ng-repeat="fieldName in fieldNamesButIdToRetrieve">
+                        <tags-input ng-if="columnIsArray[$index+1]"
+                                    ng-model="editedStudents[$parent.student.id][fieldName]"
+                                    placeholder="dodaj nowe {{fieldNamesColumnHeaders[$index+1]}}"
+                                    replace-spaces-with-dashes="false">
+                        </tags-input>
+                        <input ng-if="!columnIsArray[$index+1]" type="text"
+                               ng-value="$parent.student[fieldName]"
+                               ng-model="editedStudents[$parent.student.id][fieldName]">
+                    </div>
+                    <div class="row">
+                        <button type="submit" class="btn btn-success" ng-click="modifyStudent(student.id)"
+                                ng-disabled="newStudentForm.$invalid">
+                            <i class="fas fa-check-circle"></i>
+                        </button>
+                        <button type="button" class="btn btn-danger" ng-click="cancelEditionOf(student.id)">
+                            <i class="fas fa-undo-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="row" ng-if="$last" ng-include="'create_object.html'"></div>
+            </div>
+            <div class="table-body" ng-if="!students.length">
+                <div class="row" ng-include="'create_object.html'"></div>
+            </div>
+        </div>
     </form>
 </div>

@@ -1,4 +1,4 @@
-angular.module('wd-students', ['ngResource', 'ngRoute'])
+angular.module('wd-students', ['ngResource', 'ngRoute', /*'ui.bootstrap',*/ 'ngTagsInput'])
     .config(['$routeProvider', function ($routerProvider) {
         $routerProvider.when('/', {
             templateUrl: 'object_view_widget.html',

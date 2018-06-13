@@ -123,6 +123,36 @@ void RunServer() {
         return mustache::load_text("assets/timetable.js");
       });
 
+  CROW_GET(app, "/assets/multiselect.js")
+      ([]() {
+        mustache::context ctx;
+        return mustache::load_text("assets/multiselect.js");
+      });
+
+  CROW_GET(app, "/assets/ui-bootstrap.js")
+      ([]() {
+        mustache::context ctx;
+        return mustache::load_text("assets/ui-bootstrap.js");
+      });
+
+  CROW_GET(app, "/assets/ui-bootstrap-tpls.js")
+      ([]() {
+        mustache::context ctx;
+        return mustache::load_text("assets/ui-bootstrap-tpls.js");
+      });
+
+  CROW_GET(app, "/assets/ng-tags-input.js")
+      ([]() {
+        mustache::context ctx;
+        return mustache::load_text("assets/ng-tags-input.js");
+      });
+
+  CROW_GET(app, "/assets/ng-tags-input.css")
+      ([]() {
+        mustache::context ctx;
+        return mustache::load_text("assets/ng-tags-input.css");
+      });
+
   CROW_GET(app, "/assets/timetablejs.css")
       ([]() {
         mustache::context ctx;

@@ -26,6 +26,8 @@ angular.module('wd-students').directive('objectView', ['AddEditedFilter', functi
             self.newStudent = {};
             self.newStudentLastField = {};
             self.editedStudents = {};
+            self.manyOptions = [{id: 3, label: 'Tomasz', value: 'Robert'}, {id: 1, label: 'Roman', value: 'Gromki'}];
+            self.optionsModel = [];
             var fetchStudents = function () {
                 self.students = Student.query();
                 var len = self.students.length;
