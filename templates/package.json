@@ -25,6 +25,6 @@
     "popper.js": "1.14.3"
   },
   "scripts": {
-    "test": "./node_modules/.bin/karma start --single-run --browsers Chrome"
+    "test": "./node_modules/.bin/karma start --single-run --browsers ChromeHeadless karma.conf.js"
   }
 }

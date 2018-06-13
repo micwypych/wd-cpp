@@ -21,27 +21,29 @@ before_install:
   - sudo apt-get install libboost-all-dev
   - curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
   - sudo apt-get install -y nodejs
-  - node -v
-  - npm -v
+  - sudo apt-key adv --fetch-keys http://dl.yarnpkg.com/debian/pubkey.gpg
+  - echo "deb http://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+  - sudo apt-get update -qq
+  - sudo apt-get install -y -qq yarn
   - sudo npm i -g npm
-  - sudo npm install -g yarn
-  - sudo npm install -g karma-cli
-  - cd templates
-  - yarn
-  - ls .
-  - ls **/*
-  - cd ..
 
 install:
   - echo `which $CC`
   - echo `which $CXX`
+  - node -v
+  - npm -v
   - pwd
+  - cd templates
+  - yarn install
+  - ls .
+  - ls **/*
+  - cd ..
 
 script:
   - echo `which $CXX`
   - pwd
   - cd templates
-  - npm test
+  - yarn test
   - cd ..
   - mkdir build && cd build
   - cmake -DCMAKE_CXX_COMPILER=$CXX ..
