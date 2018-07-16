@@ -14,7 +14,7 @@ This simple application should support university managment. There are number of
   * Academic teachers' data management
   * University buildings and rooms' data management
   * University teaching programs and courses' data management
-  * [New schedule preparation algorithm](https://ai.ia.agh.edu.pl) (don't worry just a simple greedy algorithm is sufficient)
+  * [New schedule preparation algorithm](https://ai.ia.agh.edu.pl/wiki/pl:dydaktyka:jimp2:2017:labs:algorithm) (don't worry just a simple greedy algorithm is sufficient)
   
 Because it is a part of introductory programming classes the problem is simplified to handle only data managment in the language itself and therefore:
   * there are no roles of the users (everything is available publically)
